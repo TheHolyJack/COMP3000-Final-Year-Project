@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% block title %} Settings {% endblock %}
+
+
+{% block content %}
+
+<div class="container d-flex align-items-center justify-content-center">
+
+	<div class="col-xl-9 col-lg-9 col-md-12 col-sm-12 col-12">
+		<div class="card h-100">
+			<div class="card-body">
+                <img src="{{ url_for('static', filename='logo.png') }}" class="rounded mx-auto d-block" alt="...">
+                <form id="update_settings">
+				<div class="row gutters">
+					<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+						<h6 class="mb-3 text-primary">Configuration Settings</h6>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+						<div class="form-group">
+							<label for="connect_to">Connect To</label>
+							<input type="text" class="form-control" id="connect_to" placeholder="{{ config['connect_to'] }}" value="{{ config['connect_to'] }}">
+						</div>
+					</div>
+                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+						<div class="form-group">
+							<label for="key_server">Key Server</label>
+							<input type="text" class="form-control" id="key_server" placeholder="{{ config['key_server'] }}" value="{{ config['key_server'] }}">
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+						<div class="form-group">
+							<label for="interval">Ping Interval</label>
+							<input type="number" class="form-control" id="interval" placeholder="30" value="{{ config['interval'] }}">
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <br>
+						<div class="form-check form-switch">
+							<label class="form-check-label" for="enable_transmission">Enable Transmission</label>
+							<input type="checkbox" class="form-check-input" id="enable_transmission" role="switch" value={{ config['enable_transmission'] }} {% if config['enable_transmission'] %} checked {% endif %}>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <br>
+						<div class="form-check form-switch">
+							<label class="form-check-label" for="show_authorised_ships_only">Show Authorised Ships Only</label>
+							<input type="checkbox" class="form-check-input" id="show_authorised_ships_only" role="switch" value={{ config['show_authorised_ships_only'] }} {% if config['show_authorised_ships_only'] %} checked {% endif %}>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <br>
+						<div class="form-check form-switch">
+							<label class="form-check-label" for="use_correct_sig">Use Correct Signature (Showcasing Purposes Only)</label>
+							<input type="checkbox" class="form-check-input" id="use_correct_sig" role="switch" value={{ config['use_correct_sig'] }} {% if config['use_correct_sig'] %} checked {% endif %}>
+						</div>
+					</div>
+					<div class="col-xl-6 col-lg-6 col-md-6 col-sm-6 col-12">
+                        <br>
+						<div class="form-check form-switch">
+							<label class="form-check-label" for="use_encryption">Use Encryption</label>
+							<input type="checkbox" class="form-check-input" id="use_correct_sig" role="switch" value={{ config['use_encryption'] }} {% if config['use_encryption'] %} checked {% endif %}>
+						</div>
+					</div>
+				</div>
+                <br>
+                <br>
+				<div class="row gutters">
+					<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="text-right">
+							<button type="button" id="submit" name="submit" class="btn btn-primary">Update</button>
+							<button type="button" id="clear-logs" name="clear-logs" class="btn btn-primary">Clear Logs</button>
+
+						</div>
+					</div>
+				</div>
+                    </form>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+
+    <script>
+
+        function checkbool(bool){
+            return bool === true || bool === false;
+        };
+
+        window.onload = function(){
+            var socket = io();
+            socket.on('connect', function() {
+                console.log("I'm connected");
+                socket.emit('update_subscribe', {data: "I have connected"});
+            });
+
+            $('#submit').on('click', function(event){
+                let enable_transmission;
+                let show_authorised_ships_only;
+                let use_correct_sig;
+                let use_encryption;
+                if ($('#enable_transmission').is(':checked')) {
+                    enable_transmission = true;
+                } else {
+                    enable_transmission = false;
+                }
+
+                if ($('#show_authorised_ships_only').is(':checked')) {
+                    show_authorised_ships_only = true;
+                } else {
+                    show_authorised_ships_only = false;
+                }
+
+                if ($('#use_correct_sig').is(':checked')) {
+                    use_correct_sig = true;
+                } else {
+                    use_correct_sig = false;
+                }
+                if ($('#use_encryption').is(':checked')) {
+                    use_encryption = true;
+                } else {
+                    use_encryption = false;
+                }
+                let packet = {
+                    "connect_to": document.getElementById('connect_to').value,
+                    "key_server": document.getElementById('key_server').value,
+                    "interval": document.getElementById('interval').value,
+                    "enable_transmission": enable_transmission,
+                    "show_authorised_ships_only": show_authorised_ships_only,
+                    "use_correct_sig": use_correct_sig,
+                    "use_encryption": use_encryption
+
+                };
+
+                // Input validation, always better to be safe.
+                console.log(!packet['show_authorised_ships_only'] === true || !packet['show_authorised_ships_only' === false])
+                if (!(packet['show_authorised_ships_only'] === true || packet['show_authorised_ships_only'] === false)) {
+                    alert("Show Authorised Ships Only must only be true or false.");
+                } else if (!(packet['enable_transmission'] === true || packet['enable_transmission'] === false )) {
+                    alert("Enable Transmission must be true or false.");
+                } else {
+                    socket.emit('update_config', packet);
+                }
+
+                console.log(packet);
+
+            })
+
+            $('#clear-logs').on('click', function(event){
+                socket.emit('clear_logs', data={});
+            })
+
+
+        }
+    </script>
+
+{% endblock %}

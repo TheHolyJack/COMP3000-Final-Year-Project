@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}Index {% endblock %}
+{% block content %}
+    <style>
+    #map {height: 50vh;
+    overflow: auto;}
+    </style>
+
+
+<div class="container mt-5 mb-5">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="images p-3">
+                            <div class="text-center p-4">
+                                <div class="col py-3" id="map"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="product p-4">
+{#                            <div class="mt-4 mb-3"> <span class="text-uppercase text-muted brand">MMSI: {{ log['data']['mmsi'] }}</span>#}
+                                <h5 class="text-uppercase">Log #{{ log['id'] }} MMSI: {{ log['data']['mmsi'] }}</h5>
+{#                                <div class="price d-flex flex-row align-items-center"> <span class="act-price">$20</span>#}
+{#                                    <div class="ml-2"> <small class="dis-price">$59</small> <span>40% OFF</span> </div>#}
+{#                                </div>#}
+                            </div>
+                            <p><b>ID: </b> {{ log['data']['id'] }}</p>
+                            <p><b>Type: </b> {{ log['data']['type'] }}</p>
+                            <p><b>Status: </b> {{ extra['status'] }}</p>
+                            <p><b>Turn: </b> {{ extra['turn'] }}</p>
+                            <p><b>Speed: </b> {{ extra['speed'] }}</p>
+                            <p><b>Latitude: </b> {{ log['data']['lat'] }}</p>
+                            <p><b>Longitude: </b> {{ log['data']['lon'] }}</p>
+                            <p><b>Course: </b> {{ log['data']['course'] }}</p>
+                            <p><b>Heading: </b {{ log['data']['course'] }}></p>
+                            <p><b>Maneuver: </b> {{ extra['maneuver'] }}</p>
+                            <p><b>RAIM: </b> {{ extra['raim'] }}</p>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Message</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            {% for message in log['messages'] %}
+                                <tr scope="row">
+                                <th scope="col">{{ loop.index }}</th>
+                                <th scope="col">{{ message }}</th>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <script>
+
+        window.onload = function(){
+            let ships = {}
+            let polygons = Array();
+            let polygons_hidden = false;
+            var counter = 1;
+            var map = L.map('map').setView([{{log['data']['lat']}}, {{log['data']['lon']}}], 5);
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var selfboatping = L.marker([{{log['data']['lat']}}, {{log['data']['lon']}}]);
+        selfboatping.addTo(map).bindPopup();
+            {% if log['data']['authed'] == 0 %}
+        var selfboatcircle = L.circle([{{log['data']['lat']}}, {{log['data']['lon']}}],{
+            color: 'red',
+            fillColor: '#ffff',
+            fillOpacity: 0.2,
+            radius: 200
+        }).addTo(map);
+            {% elif log['data']['authed'] == 1 %}
+        var selfboatcircle = L.circle([{{log['data']['lat']}}, {{log['data']['lon']}}],{
+            color: 'green',
+            fillColor: '#ffff',
+            fillOpacity: 0.2,
+            radius: 200
+        }).addTo(map);
+            {% elif log['data']['authed'] == 2 %}
+        var selfboatcircle = L.circle([{{log['data']['lat']}}, {{log['data']['lon']}}],{
+            color: 'yellow',
+            fillColor: '#ffff',
+            fillOpacity: 0.2,
+            radius: 200
+        }).addTo(map);
+            {% endif %}
+
+
+
+
+
+        setTimeout(function(){
+            map.invalidateSize();
+        }, 0)
+        }
+
+
+    </script>
+
+{% endblock %}

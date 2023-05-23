@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block title %} Logs {% endblock %}
+{% block content %}
+  {% for ships in ship_logs %}
+      <tr>
+     <div class="row p-2 bg-white border rounded">
+         <div class="col-md-1 mt-1">
+             <div class="col-md-3 mt-1"></div>
+         </div>
+                <div class="col-md-6 mt-1">
+                    <h5><b>MMSI:</b> {{ ships['data']['mmsi'] }}</h5>
+                    <div class="d-flex flex-row">
+                        <div class="ratings mr-2"><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i><i class="fa fa-star"></i></div><span></span>
+                    </div>
+                    <div class="mt-1 mb-1 spec-1"><span><b>Type:</b></span> {{ ships['data']['type'] }}</div>
+                    <div class="mt-1 mb-1 spec-1"><b>Lat:</b> {{ ships['data']['lat'] }}</div>
+                    <div class="mt-1 mb-1 spec-1"><b>Lon:</b> {{ ships['data']['lon'] }}</div>
+                    {% if ships['data']['authed'] == 1 %}
+                    <p class="text-justify text-truncate para mb-0">This transmission's signature has been verified against public key records.<br><br></p>
+                        <p class="text-justify text-truncate para mb-0"><b>Signature: </b>{{ ships['sig'] }}</p>
+                    {% elif ships['data']['authed'] == 2 %}
+                    <p class="text-justify text-truncate para mb-0">This transmission has a signature attached, but we could not verify against public records.<br><br></p>
+                        <p class="text-justify text-truncate para mb-0"><b>Signature: </b>{{ ships['sig'] }}</p>
+                    {% elif ships['data']['authed'] == 0 %}
+                    <p class="text-justify text-truncate para mb-0">This transmission's signature was not verified against the public key.<br><br></p>
+                        <p class="text-justify text-truncate para mb-0"><b>Signature: </b>{{ ships['sig'] }}</p>
+                    {% endif %}
+                </div>
+                <div class="align-items-center align-content-center col-md-3 border-left mt-1">
+                    <div class="d-flex flex-row align-items-center">
+                        <h4 class="mr-1">Authentication Status</h4>
+                    </div>
+                    {% if ships['data']['authed'] == 1 %}
+                    <h6 class="text-success">Authenticated</h6>
+                    {% elif ships['data']['authed'] == 2 %}
+                    <h6 class="text-warning">Signature-Attached</h6>
+                    {% elif ships['data']['authed'] == 0 %}
+                    <h6 class="text-danger">Un-Authenticated</h6>
+                    {% endif %}
+                    <div id="ship_{{ ships['id'] }}" class="d-flex flex-column mt-4"><button class="btn btn-primary btn-sm" type="button">View Packet</button></div>
+                </div>
+            </div>
+      </tr>
+{% endfor %}
+{#    <table class="table">#}
+{#        <thead>#}
+{#            <tr>#}
+{#                <th scope="col">Type</th>#}
+{#                <th scope="col">MMSI</th>#}
+{#                <th scope="col">Name</th>#}
+{#                <th scope="col">Course</th>#}
+{#                <th scope="col">Latitute</th>#}
+{#                <th scope="col">Longitude</th>#}
+{#                <th scope="col">Authed</th>#}
+{#            </tr>#}
+{#        </thead>#}
+{#    <tbody>#}
+{#        {% for ships in ship_logs %}#}
+{#        {% for key, value in ships.items() %}#}
+{#                {% if ships['data']['authed'] == 1 %}#}
+{#                    <tr class="bg-success" onclick="document.window.location='{{url_for('ViewLog', log=ships['id']) }}'">#}
+{#                {% elif ships['data']['authed'] == 0 %}#}
+{#                    <tr class="bg-danger">#}
+{#                {% elif ships['data']['authed'] == 2 %}#}
+{#                    <tr class="bg-warning">#}
+{#                {% endif %}#}
+{##}
+{#            <th scope="row">{{ ships['data']['type'] }}</th>#}
+{#            <th scope="row">{{ ships['data']['mmsi'] }}</th>#}
+{#            <th scrope="row">{{ ships['data']['name'] }}</th>#}
+{#            <th>{{ ships['data']['course'] }}</th>#}
+{#            <th>{{ ships['data']['lat'] }}</th>#}
+{#            <th>{{ ships['data']['lat'] }}</th>#}
+{#            <th>{{ ships['data']['authed'] }}</th>#}
+{#            </tr>#}
+{#        {% endfor %}#}
+{#    {% endfor %}#}
+{#    </tbody>#}
+{#    </table>#}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    {% for ships in ship_logs %}
+        $('#ship_{{ ships['id'] }}').on('click', function(){
+            window.location.href = "{{ url_for('ViewLog', log=ships['id']) }}"
+        })
+    {% endfor %}
+</script>
+
+
+{% endblock %}
